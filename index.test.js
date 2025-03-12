@@ -35,4 +35,77 @@ describe('Social Sequelzie Test', () => {
         const like = await Like.create({ reactionType: "Like", createdAt: "3/11/2025" })
         expect(like.reactionType).toBe("Like");
     });
+    
+    // ASSOCIATION TESTS
+    test("User has one Profile", async () => {
+        const user = await User.create({ username: "Damien", email: "damien.z.hall@gmail.com" });
+        const profile = await Profile.create({ bio: "My name is Damien and I program :)", profilePicture: "pfp.jpeg", birthday: "11/08/2003" });
+        await user.setProfile(profile);
+        expect(await (await user.getProfile()).bio).toBe(profile.bio);
+    });
+
+    test("Profile has one User", async () => {
+        const user = await User.create({ username: "Damien", email: "damien.z.hall@gmail.com" });
+        const profile = await Profile.create({ bio: "My name is Damien and I program :)", profilePicture: "pfp.jpeg", birthday: "11/08/2003" });
+        await profile.setUser(user);
+        expect(await (await profile.getUser()).username).toBe(user.username);
+    });
+
+    test("User has many Post", async () => {
+        const user = await User.create({ username: "Damien", email: "damien.z.hall@gmail.com" });
+        const posts = [
+            await Post.create({ title: "This is a Post 1", body: "Post content 1", createdAt: "3/12/2025" }),
+            await Post.create({ title: "This is a Post 2", body: "Post content 2", createdAt: "3/12/2025" })
+        ];
+        await user.addPosts(posts[0]);
+        await user.addPosts(posts[1]);
+        expect(await ( await user.getPosts() )[0].title).toBe(posts[0].title);
+    });
+
+    test("Post has one User", async () => {
+        const user = await User.create({ username: "Damien", email: "damien.z.hall@gmail.com" });
+        const post = await Post.create({ title: "This is a Post", body: "Post content", createdAt: "3/12/2025" });
+        await post.setUser(user);
+        expect(await (await post.getUser()).username).toBe(user.username);
+    });
+    
+    test("Post has many Comment", async () => {  
+        const post = await Post.create({ title: "This is a Post", body: "Post content", createdAt: "3/12/2025" });
+        const comments = [
+            await Comment.create({ body: "This is a comment 1", createdAt: "3/12/2025" }),
+            await Comment.create({ body: "This is a comment 2", createdAt: "3/12/2025" })
+        ];
+        await post.addComment(comments[0]);
+        await post.addComment(comments[1]);
+        expect(await (await post.getComments())[0].body).toBe(comments[0].body);
+    });
+
+    test("Comment has one Post", async () => {
+        const post = await Post.create({ title: "This is a Post", body: "Post content", createdAt: "3/12/2025" });
+        const comment = await Comment.create({ body: "This is a comment", createdAt: "3/12/2025" });
+        await comment.setPost(post);
+        expect(await (await comment.getPost()).title).toBe(post.title);
+    });
+
+    test("User has many Like", async () => {
+        const user = await User.create({ username: "Damien", email: "damien.z.hall@gmail.com" });
+        const likes = [
+            await Like.create({ reactionType: "Like", createdAt: "3/12/2025" }),
+            await Like.create({ reactionType: "Heart", createdAt: "3/12/2025" })
+        ];
+        await user.addLike(likes[0]);
+        await user.addLike(likes[1]);
+        expect(await (await user.getLikes())[0].reactionType).toBe(likes[0].reactionType);
+    });
+
+    test("Like has many User", async () => {
+        const like = await Like.create({ reactionType: "Like", createdAt: "3/12/2025" });
+        const users = [
+            await User.create({ username: "Damien", email: "damien.z.hall@gmail.com" }),
+            await User.create({ username: "Chris", email: "chris.z.hall@gmail.com" })
+        ];
+        await like.addUser(users[0]); 
+        await like.addUser(users[1]); 
+        expect(await (await like.getUsers())[0].username).toBe(users[0].username);
+    }); 
 })
